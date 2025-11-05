@@ -58,6 +58,7 @@ def health():
 # ==================== MAIN ====================
 
 if __name__ == '__main__':
+    #this was added
     PORT = int(os.getenv('PORT', 8080))
     logger.info(f'Starting Flask-SocketIO server on port {PORT}')
     socketio.run(app, host='0.0.0.0', port=PORT, debug=True, allow_unsafe_werkzeug=True)
