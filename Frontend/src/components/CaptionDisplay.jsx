@@ -1,167 +1,74 @@
-import React, { useState, useEffect, useRef } from "react";
-import socket from "../socket";
-import "./CaptionDisplay.css";
+import React, { useEffect, useRef } from 'react';
+import './CaptionDisplay.css';
 
-const CaptionDisplay = ({ isTranscribing }) => {
-  const [captions, setCaptions] = useState([]);
-  const [confidence, setConfidence] = useState(0);
-  const [currentCaption, setCurrentCaption] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef(null);
-  const captionsBoxRef = useRef(null);
+const CaptionDisplay = ({ captions, currentTime }) => {
+  const captionContainerRef = useRef(null);
+  const [currentCaption, setCurrentCaption] = React.useState(null);
 
   useEffect(() => {
-    // Receive caption from backend
-    socket.on("caption", (data) => {
-      setCurrentCaption(data.text);
-      setConfidence((data.confidence * 100) || 0);
-      setCaptions((prev) => [...prev, data]);
-      setIsLoading(false);
+    // Find the caption that should be displayed at current time
+    const activeCaption = captions.find(caption => {
+      const start = caption.start_time;
+      const end = caption.end_time || caption.start_time + 3; // Default 3 second duration
+      return currentTime >= start && currentTime <= end;
     });
 
-    // Transcription completed
-    socket.on("done", (data) => {
-      console.log("✅ Transcription completed!");
-      setIsLoading(false);
-      if (data.full_transcript) {
-        console.log("Full transcript:", data.full_transcript);
-      }
-    });
+    setCurrentCaption(activeCaption);
+  }, [currentTime, captions]);
 
-    // Error handling
-    socket.on("error", (data) => {
-      console.error("❌ Backend error:", data.message);
-      setIsLoading(false);
-      setCurrentCaption("Error: " + data.message);
-    });
-
-    setIsLoading(isTranscribing);
-
-    return () => {
-      socket.off("caption");
-      socket.off("done");
-      socket.off("error");
-    };
-  }, [isTranscribing]);
-
-  // Auto-scroll to latest caption
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    // Auto-scroll to latest caption
+    if (captionContainerRef.current) {
+      captionContainerRef.current.scrollTop = captionContainerRef.current.scrollHeight;
     }
   }, [captions]);
 
-  const downloadTranscript = () => {
-    const fullText = captions.map((c) => c.text).join("\n");
-    const element = document.createElement("a");
-    element.setAttribute(
-      "href",
-      "data:text/plain;charset=utf-8," + encodeURIComponent(fullText)
-    );
-    element.setAttribute("download", "captions.txt");
-    element.style.display = "none";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-  };
-
-  const clearCaptions = () => {
-    setCaptions([]);
-    setCurrentCaption("");
-    setConfidence(0);
-  };
-
   return (
-    <div className="caption-display-section">
-      <div className="caption-card">
-        {/* HEADER */}
-        <div className="caption-header">
-          <h2>🎙️ Live Captions</h2>
-          <div className="header-controls">
-            {captions.length > 0 && (
-              <>
-                <button
-                  onClick={downloadTranscript}
-                  className="btn-small btn-download"
-                  title="Download transcript as text file"
-                >
-                  📥 Download
-                </button>
-                <button
-                  onClick={clearCaptions}
-                  className="btn-small btn-clear"
-                  title="Clear all captions"
-                >
-                  🗑️ Clear
-                </button>
-              </>
-            )}
+    <div className="caption-display-container">
+      <h3>Real-Time Captions</h3>
+      
+      {/* Current Caption - Large Display */}
+      <div className="current-caption-display">
+        {currentCaption ? (
+          <div className="current-caption active">
+            <p className="caption-text">{currentCaption.text}</p>
+            <span className="caption-timestamp">
+              {formatTime(currentCaption.start_time)}
+            </span>
           </div>
-        </div>
+        ) : (
+          <p className="no-caption">Waiting for captions...</p>
+        )}
+      </div>
 
-        {/* CURRENT CAPTION DISPLAY */}
-        {(isLoading || currentCaption) && (
-          <div className="current-caption-box">
-            <div className={`current-caption ${isLoading ? "loading" : ""}`}>
-              {isLoading && !currentCaption ? (
-                <>
-                  <div className="spinner"></div>
-                  <p>⏳ Waiting for captions...</p>
-                </>
-              ) : (
-                <>
-                  <p className="caption-text">{currentCaption}</p>
-                  {confidence > 0 && (
-                    <div className="confidence-bar">
-                      <div
-                        className="confidence-fill"
-                        style={{ width: `${confidence}%` }}
-                      ></div>
-                      <span className="confidence-text">
-                        Confidence: {confidence.toFixed(0)}%
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+      {/* Caption History */}
+      <div className="caption-history" ref={captionContainerRef}>
+        <h4>Caption History</h4>
+        {captions.length === 0 ? (
+          <p className="empty-message">No captions yet. Captions will appear here as the video plays.</p>
+        ) : (
+          <div className="caption-list">
+            {captions.map((caption, index) => (
+              <div 
+                key={index} 
+                className={`caption-item ${currentCaption?.start_time === caption.start_time ? 'highlight' : ''}`}
+              >
+                <span className="time-badge">{formatTime(caption.start_time)}</span>
+                <p className="caption-text">{caption.text}</p>
+              </div>
+            ))}
           </div>
         )}
-
-        {/* CAPTIONS HISTORY */}
-        <div className="captions-header">
-          <h3>📜 Caption History ({captions.length})</h3>
-        </div>
-
-        <div className="captions-box" ref={captionsBoxRef}>
-          {captions.length === 0 ? (
-            <div className="empty-state">
-              <p>😊 No captions yet</p>
-              <p>Upload a video or paste YouTube link to get started!</p>
-            </div>
-          ) : (
-            captions.map((cap, i) => (
-              <div key={i} className="caption-item">
-                <span className="caption-index">{i + 1}</span>
-                <div className="caption-content">
-                  <p className="caption-simplified">{cap.text}</p>
-                  {cap.original && cap.original !== cap.text && (
-                    <p className="caption-original">Original: {cap.original}</p>
-                  )}
-                  {cap.confidence && (
-                    <span className="caption-confidence">
-                      ✓ {(cap.confidence * 100).toFixed(0)}%
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-          <div ref={scrollRef}></div>
-        </div>
       </div>
     </div>
   );
+};
+
+// Helper function to format time
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
 export default CaptionDisplay;

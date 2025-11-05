@@ -38,4 +38,3 @@ class SpeechToText:
         except Exception as e:
             print(f"❌ Error: {e}")
             return {'transcript': '', 'confidence': 0}
-
