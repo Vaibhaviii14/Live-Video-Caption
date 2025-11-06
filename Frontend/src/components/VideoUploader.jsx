@@ -281,6 +281,7 @@
 // export default VideoUploader;
 
 import React, { useState } from 'react';
+import './VideoUploader.css';
 
 const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
 

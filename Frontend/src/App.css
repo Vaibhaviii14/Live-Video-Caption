@@ -90,3 +90,26 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.App-header h1 {
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.status-message {
+ 
+  padding: 15px;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  border-radius: 5px;
+  color: #1976d2;
+  font-weight: 500;
+  min-height: 1.2em; /* Prevents layout shift */
+  text-align: left;
+}
+
+.App-main {
+  background: #ffffff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+}
