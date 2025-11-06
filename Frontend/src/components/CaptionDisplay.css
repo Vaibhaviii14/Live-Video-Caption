@@ -2,17 +2,26 @@
   background: white;
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-  height: fit-content;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  margin-top: 20px;
 }
 
 .caption-display-container h3 {
   margin: 0 0 20px 0;
   color: #667eea;
   font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.caption-display-container h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .current-caption-display {
@@ -24,10 +33,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
 }
 
 .current-caption {
   text-align: center;
+  width: 100%;
 }
 
 .current-caption .caption-text {
@@ -35,19 +46,28 @@
   font-size: 1.8rem;
   font-weight: 600;
   line-height: 1.6;
-  margin: 0 0 10px 0;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  margin: 0 0 15px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  word-wrap: break-word;
 }
 
-.current-caption .caption-timestamp {
-  color: rgba(255,255,255,0.8);
-  font-size: 1rem;
+.caption-timestamp {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
   font-weight: 500;
+  display: block;
+}
+
+.caption-confidence {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 8px;
 }
 
 .no-caption {
-  color: rgba(255,255,255,0.7);
-  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
   font-style: italic;
   margin: 0;
 }
@@ -60,12 +80,6 @@
   border-radius: 10px;
 }
 
-.caption-history h4 {
-  margin: 0 0 15px 0;
-  color: #333;
-  font-size: 1.2rem;
-}
-
 .empty-message {
   color: #999;
   text-align: center;
@@ -73,43 +87,54 @@
   font-style: italic;
 }
 
-.caption-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .caption-item {
   padding: 15px;
   background: white;
   border-radius: 10px;
   border-left: 4px solid #667eea;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   transition: all 0.3s ease;
 }
 
 .caption-item.highlight {
   background: #fff8e1;
   border-left-color: #ffc107;
-  transform: scale(1.02);
   box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+  transform: scale(1.02);
 }
 
 .time-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 6px 12px;
   background: #667eea;
   color: white;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .caption-item .caption-text {
   margin: 0;
   color: #333;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
+  flex: 1;
+}
+
+.mini-confidence {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #e0e0e0;
+  color: #666;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Scrollbar styling */
